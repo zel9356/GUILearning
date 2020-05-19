@@ -20,6 +20,7 @@ lastImage = t.Label(window, text="The last image saved:", width=width)
 lastImage.grid(column=1, row=0)
 last = t.Label(window, text="NONE", width=width, border=5, relief="solid", bg="white", font=("Helvetica", 8))
 last.grid(column=1, row=1)
+count = 0;
 
 
 def crop(image1, factor):
@@ -127,12 +128,34 @@ def getType(image1):
     return formatType
 
 
-def captureFromCam():
+def captureFromCam(row):
+    """
+    Opens Camera once closed (esc), a image can be taken of the last frame using the created take
+    make take image button live
+    :param row: int- row to place button to take image
+    :return: NONE
+    """
+
+    def captureImage():
+        """
+        Action event for take image Button
+        Captures image after camera closed
+        Saves image to "opencv_frame.png"
+        :return: NONE
+        """
+        # string of name we will give image
+        img_name = "opencv_frame.png"
+        # save image frame as img_name
+        cv2.imwrite(img_name, frame)
+        print("{} written!".format(img_name))
+
+    takeImage = t.Button(text="Take Image", bg="fireBrick4", fg="white", width=width, command=captureImage)
+    takeImage.grid(column=1, row=row)
     vid = cv2.VideoCapture(0)
-    img_counter = 0;
     while (True):
         # Capture the video frame
         # by frame
+
         ret, frame = vid.read()
         if not ret:
             print("failed to grab frame")
@@ -148,14 +171,7 @@ def captureFromCam():
             # ESC pressed
             print("Escape hit, closing...")
             break
-        elif k % 256 == 32:
-            # SPACE pressed
-            # string of name we will give image
-            img_name = "opencv_frame_{}.png".format(img_counter)
-            # save image frame as img_name
-            cv2.imwrite(img_name, frame)
-            print("{} written!".format(img_name))
-            img_counter += 1
+
     vid.release()
     cv2.destroyAllWindows()
 
@@ -433,10 +449,25 @@ def getFormatButton(row):
 
 
 def makeLiveViewButton(row):
-    def openPressed():
-        captureFromCam()
+    """
+    Makes the Live view button and its event functionx.
+    When the Live view button is pressed openPressed is called and the camera is opned
+    a nonfunctional button, take image, is made
+    :param row: int- the row we start placing at
+    :return: Int: how many rows down the making of this button, labels and entry caused
+    """
+    takeImage = t.Button(text="Take Image", bg="fireBrick4", fg="white", width=width)
+    takeImage.grid(column=1, row=row)
 
-    openCamera = t.Button(text="Live Camera View", bg="fireBrick4", fg="white", width= width, command=openPressed)
+    def openPressed():
+        """
+         This is the event that occurs when the live view button is pressed
+         It calls capture from cam that opens the camera and make the take image button live
+         :return: NONE
+         """
+        captureFromCam(row)
+
+    openCamera = t.Button(text="Live Camera View", bg="fireBrick4", fg="white", width=width, command=openPressed)
     openCamera.grid(column=0, row=row)
     return row
 
